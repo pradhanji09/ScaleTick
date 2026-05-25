@@ -11,8 +11,10 @@ async function bootstrap() {
     new FastifyAdapter(),
   );
 
-  await app.listen(3000, '0.0.0.0');
-  console.log(`🚀 ScaleTick API is running on: http://localhost:3000`);
+  const port = process.env.PORT ?? 3000;
+  await app.listen(port, '0.0.0.0');
+  console.log(`Server running on: http://localhost:${port}`);
 }
+
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 bootstrap();
