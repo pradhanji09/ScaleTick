@@ -19,7 +19,7 @@ export class Order {
   id: string;
 
   @Column({ unique: true })
-  idempotencyKey: string;
+  idempotency_key: string;
 
   @Column({
     type: 'enum',
