@@ -9,6 +9,8 @@ import { Order } from './Orders/entities/order.entity';
 import { Ticket } from './Tickets/entities/ticket.entity';
 import { LoggerModule } from 'nestjs-pino';
 import { createLoggerConfig } from './common/logger/logger.config';
+import { AuthModule } from './Auth/auth.module';
+import { UsersModule } from './Users/users.module';
 
 @Module({
   imports: [
@@ -35,6 +37,8 @@ import { createLoggerConfig } from './common/logger/logger.config';
         synchronize: (process.env.NODE_ENV as string) === 'development',
       }),
     }),
+    UsersModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
