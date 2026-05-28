@@ -1,3 +1,6 @@
+import { userResponse } from './../Users/users.types';
+import { loginResponse } from './auth.types';
+import { userTransformer } from './../Users/users.transformer';
 import { UsersService } from 'src/Users/users.service';
 import {
   ConflictException,
@@ -14,7 +17,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async registerUser(email: string, password: string) {
+  async registerUser(email: string, password: string): Promise<userResponse> {
     // Check Existing user with email
     const existingUser = await this.userServie.findByEmail(email);
     if (existingUser) throw new ConflictException();
@@ -22,12 +25,10 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await this.userServie.create(email, hashedPassword);
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password: _, ...result } = user;
-    return result;
+    return userTransformer.toRegisterResponse(user);
   }
 
-  async loginUser(email: string, password: string) {
+  async loginUser(email: string, password: string): Promise<loginResponse> {
     const user = await this.userServie.findByEmail(email);
     if (!user) throw new UnauthorizedException('Invalid credentials');
 

@@ -1,3 +1,5 @@
+import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
 import { Public } from 'src/common/decorators/public.decorator';
 import { AuthService } from './auth.service';
 import { Body, Controller, Post } from '@nestjs/common';
@@ -8,13 +10,13 @@ export class AuthController {
 
   @Public()
   @Post('register')
-  registerUser(@Body() body: { email: string; password: string }) {
+  registerUser(@Body() body: RegisterDto) {
     return this.authService.registerUser(body.email, body.password);
   }
 
   @Public()
   @Post('login')
-  loginUser(@Body() body: { email: string; password: string }) {
+  loginUser(@Body() body: LoginDto) {
     return this.authService.loginUser(body.email, body.password);
   }
 }

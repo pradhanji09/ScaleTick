@@ -5,6 +5,7 @@ import {
 } from '@nestjs/platform-fastify';
 import { AppModule } from './app.module';
 import { Logger } from 'nestjs-pino';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -14,6 +15,12 @@ async function bootstrap() {
   );
 
   app.useLogger(app.get(Logger));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true, // strips fields not in DTO
+      forbidNonWhitelisted: true, // throws error if extra fields sent
+    }),
+  );
 
   const port = process.env.PORT ?? 3000;
   await app.listen(port, '0.0.0.0');
