@@ -1,12 +1,20 @@
 import { UsersService } from 'src/Users/users.service';
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly userServie: UsersService) {}
+  constructor(
+    private readonly userServie: UsersService,
+    private readonly jwtService: JwtService,
+  ) {}
 
-  async register(email: string, password: string) {
+  async registerUser(email: string, password: string) {
     // Check Existing user with email
     const existingUser = await this.userServie.findByEmail(email);
     if (existingUser) throw new ConflictException();
@@ -17,5 +25,25 @@ export class AuthService {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: _, ...result } = user;
     return result;
+  }
+
+  async loginUser(email: string, password: string) {
+    const user = await this.userServie.findByEmail(email);
+    if (!user) throw new UnauthorizedException('Invalid credentials');
+
+    const isPasswordMatched = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordMatched)
+      throw new UnauthorizedException('Invalid credentials');
+
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      is_admin: user.is_admin,
+    };
+
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
   }
 }

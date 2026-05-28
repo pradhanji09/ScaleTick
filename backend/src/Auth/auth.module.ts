@@ -17,7 +17,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       useFactory: (config: ConfigService) => ({
         secret: config.getOrThrow<string>('JWT_SECRET'),
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        signOptions: config.get<string>('JWT_EXPIRES_IN') as any,
+        signOptions: { expiresIn: config.get<string>('JWT_EXPIRES_IN') as any },
       }),
     }),
   ],
