@@ -11,6 +11,9 @@ import { LoggerModule } from 'nestjs-pino';
 import { createLoggerConfig } from './common/logger/logger.config';
 import { AuthModule } from './Auth/auth.module';
 import { UsersModule } from './Users/users.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { RoleGuard } from './common/guards/roles.guard';
 
 @Module({
   imports: [
@@ -41,6 +44,10 @@ import { UsersModule } from './Users/users.module';
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: RoleGuard },
+  ],
 })
 export class AppModule {}
