@@ -1,3 +1,4 @@
+import { AllExceptionsFilter } from './common/exceptions/all-exceptions.filter';
 import { NestFactory } from '@nestjs/core';
 import {
   FastifyAdapter,
@@ -21,6 +22,7 @@ async function bootstrap() {
       forbidNonWhitelisted: true, // throws error if extra fields sent
     }),
   );
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   const port = process.env.PORT ?? 3000;
   await app.listen(port, '0.0.0.0');

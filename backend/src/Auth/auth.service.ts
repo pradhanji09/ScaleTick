@@ -2,13 +2,14 @@ import { userResponse } from './../Users/users.types';
 import { loginResponse } from './auth.types';
 import { userTransformer } from './../Users/users.transformer';
 import { UsersService } from 'src/Users/users.service';
-import {
-  ConflictException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import {
+  InvalidCredentials,
+  UserAlreadyExists,
+  UserNotFound,
+} from './auth.errors';
 
 @Injectable()
 export class AuthService {
@@ -20,7 +21,7 @@ export class AuthService {
   async registerUser(email: string, password: string): Promise<userResponse> {
     // Check Existing user with email
     const existingUser = await this.userServie.findByEmail(email);
-    if (existingUser) throw new ConflictException();
+    if (existingUser) throw UserAlreadyExists;
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await this.userServie.create(email, hashedPassword);
@@ -30,12 +31,11 @@ export class AuthService {
 
   async loginUser(email: string, password: string): Promise<loginResponse> {
     const user = await this.userServie.findByEmail(email);
-    if (!user) throw new UnauthorizedException('Invalid credentials');
+    if (!user) throw UserNotFound;
 
     const isPasswordMatched = await bcrypt.compare(password, user.password);
 
-    if (!isPasswordMatched)
-      throw new UnauthorizedException('Invalid credentials');
+    if (!isPasswordMatched) throw InvalidCredentials;
 
     const payload = {
       sub: user.id,
