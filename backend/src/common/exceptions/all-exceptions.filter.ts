@@ -66,6 +66,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       errors,
     };
 
+    this.logger.warn(errorResponse);
     reply.status(statusCode).send(errorResponse);
   }
 }

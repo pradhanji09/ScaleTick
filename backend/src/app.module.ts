@@ -1,3 +1,4 @@
+import { EventsModule } from './Events/events.module';
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -14,6 +15,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RoleGuard } from './common/guards/roles.guard';
 import { Event } from './Events/entities/event.entity';
+import { TicketModule } from './Tickets/tickets.module';
 
 @Module({
   imports: [
@@ -42,6 +44,8 @@ import { Event } from './Events/entities/event.entity';
     }),
     UsersModule,
     AuthModule,
+    EventsModule,
+    TicketModule,
   ],
   controllers: [AppController],
   providers: [

@@ -43,7 +43,7 @@ export const createLoggerConfig = (config: ConfigService) => {
             target: 'pino-pretty',
             options: {
               colorize: true,
-              singleLine: true,
+              ignore: 'pid,hostname,context',
             },
           },
     },

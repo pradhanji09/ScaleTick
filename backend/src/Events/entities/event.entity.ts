@@ -19,7 +19,7 @@ export class Event {
     type: 'text',
     nullable: true,
   })
-  event_description: string;
+  event_description: string | null;
 
   @Column({ type: 'int' })
   total_tickets: number;
