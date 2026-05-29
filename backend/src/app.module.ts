@@ -4,7 +4,6 @@ import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './Users/entities/user.entity';
-import { Sale } from './Sales/entities/sale.entity';
 import { Order } from './Orders/entities/order.entity';
 import { Ticket } from './Tickets/entities/ticket.entity';
 import { LoggerModule } from 'nestjs-pino';
@@ -14,6 +13,7 @@ import { UsersModule } from './Users/users.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RoleGuard } from './common/guards/roles.guard';
+import { Event } from './Events/entities/event.entity';
 
 @Module({
   imports: [
@@ -36,7 +36,7 @@ import { RoleGuard } from './common/guards/roles.guard';
         username: config.get<string>('POSTGRES_USER'),
         password: config.get<string>('POSTGRES_PASSWORD'),
         database: config.get<string>('POSTGRES_DB'),
-        entities: [User, Sale, Order, Ticket],
+        entities: [User, Event, Order, Ticket],
         synchronize: (process.env.NODE_ENV as string) === 'development',
       }),
     }),

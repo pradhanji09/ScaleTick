@@ -1,4 +1,4 @@
-import { SaleStatus } from 'src/common/enums/sale-status.enum';
+import { EventStatus } from '../../common/enums/event-status.enum';
 import {
   Column,
   CreateDateColumn,
@@ -7,19 +7,19 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-@Entity('sales')
-export class Sale {
+@Entity('events')
+export class Event {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column()
-  title: string;
+  event_title: string;
 
   @Column({
     type: 'text',
     nullable: true,
   })
-  description: string;
+  event_description: string;
 
   @Column({ type: 'int' })
   total_tickets: number;
@@ -32,10 +32,10 @@ export class Sale {
 
   @Column({
     type: 'enum',
-    enum: SaleStatus,
-    default: SaleStatus.DRAFT,
+    enum: EventStatus,
+    default: EventStatus.DRAFT,
   })
-  status: SaleStatus;
+  status: EventStatus;
 
   @Column({ type: 'timestamp' })
   starts_at: Date;

@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 
 import { TicketStatus } from '../../common/enums/ticket-status.enum';
-import { Sale } from 'src/Sales/entities/sale.entity';
+import { Event } from 'src/Events/entities/event.entity';
 
 @Entity('tickets')
 export class Ticket {
@@ -29,12 +29,12 @@ export class Ticket {
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   price: number;
 
-  @ManyToOne(() => Sale, { nullable: false, onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'sale_id' })
-  sale: Sale;
+  @ManyToOne(() => Event, { nullable: false, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'event_id' })
+  event: Event;
 
-  @Column()
-  sale_id: string;
+  @Column({ name: 'event_id' })
+  eventId: string;
 
   @CreateDateColumn()
   created_at: Date;

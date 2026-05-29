@@ -1,3 +1,6 @@
+import { Ticket } from './../../Tickets/entities/ticket.entity';
+import { User } from './../../Users/entities/user.entity';
+import { Event } from './../../Events/entities/event.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -9,9 +12,6 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { OrderStatus } from '../../common/enums/order-status.enum';
-import { User } from 'src/Users/entities/user.entity';
-import { Sale } from 'src/Sales/entities/sale.entity';
-import { Ticket } from 'src/Tickets/entities/ticket.entity';
 
 @Entity('orders')
 export class Order {
@@ -38,19 +38,19 @@ export class Order {
   @Column({ name: 'user_id' })
   userId: string;
 
-  @ManyToOne(() => Sale, { nullable: false })
-  @JoinColumn({ name: 'sale_id' })
-  sale: Sale;
+  @ManyToOne(() => Event, { nullable: false })
+  @JoinColumn({ name: 'event_id' })
+  event: Event;
 
-  @Column({ name: 'sale_id' })
-  saleId: string;
+  @Column({ name: 'event_id' })
+  eventId: string;
 
   @OneToOne(() => Ticket, { nullable: false })
   @JoinColumn({ name: 'ticket_id' })
   ticket: Ticket;
 
-  @Column()
-  ticket_id: string;
+  @Column({ name: 'ticket_id' })
+  tickeId: string;
 
   @CreateDateColumn()
   created_at: Date;

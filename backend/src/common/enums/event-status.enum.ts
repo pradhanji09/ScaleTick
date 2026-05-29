@@ -1,4 +1,4 @@
-export enum SaleStatus {
+export enum EventStatus {
   DRAFT = 'DRAFT',
   SCHEDULED = 'SCHEDULED',
   LIVE = 'LIVE',
