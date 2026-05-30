@@ -2,6 +2,7 @@ import { EventResponse } from './events.types';
 import { EventStatus } from './../common/enums/event-status.enum';
 import { CreateEventDto } from './dto/create-event.dto';
 import { Event } from './entities/event.entity';
+
 export class EventTransformer {
   static toEventEntity(data: CreateEventDto) {
     return {
@@ -19,14 +20,16 @@ export class EventTransformer {
     return {
       id: event.id,
       event_title: event.event_title,
-      event_description: event.event_description,
+      ...(event.event_description && {
+        event_description: event.event_description,
+      }),
       total_tickets: event.total_tickets,
       available_tickets: event.available_tickets,
       price: event.price,
       status: event.status,
       starts_at: event.starts_at,
-      ends_at: event.ends_at,
-      created_at: event.created_at,
+      // ends_at: event.ends_at,
+      // created_at: event.created_at,
     };
   }
 }
