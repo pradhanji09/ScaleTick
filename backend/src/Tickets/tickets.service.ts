@@ -1,7 +1,7 @@
 import { Ticket } from './entities/ticket.entity';
 import { TicketStatus } from './../common/enums/ticket-status.enum';
 import { Injectable } from '@nestjs/common';
-import { EntityManager } from 'typeorm';
+import { EntityManager, In } from 'typeorm';
 
 @Injectable()
 export class TicketsService {
@@ -36,5 +36,18 @@ export class TicketsService {
 
       await manager.insert(Ticket, ticketChunk);
     }
+  }
+
+  async cancelTicketsForEvent(id: string, manager: EntityManager) {
+    await manager.update(
+      Ticket,
+      {
+        eventId: id,
+        status: In([TicketStatus.AVAILABLE, TicketStatus.RESERVED]),
+      },
+      {
+        status: TicketStatus.CANCELLED,
+      },
+    );
   }
 }

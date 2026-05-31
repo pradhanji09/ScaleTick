@@ -80,4 +80,23 @@ export class EventsService {
 
     return EventTransformer.toResponse(updated);
   }
+
+  async cancelEvent(id: string) {
+    return await this.dataSource.transaction(async (manager) => {
+      const event = await manager.findOne(Event, { where: { id } });
+      if (!event) throw EventNotFound;
+
+      const canTransition = EventStateMachine.canTransition(
+        event.status,
+        EventStatus.CANCELLED,
+      );
+      if (!canTransition) throw InvalidStatusTransition;
+
+      event.status = EventStatus.CANCELLED;
+      const savedEvent = await manager.save(Event, event);
+
+      await this.ticketService.cancelTicketsForEvent(id, manager);
+      return EventTransformer.toResponse(savedEvent);
+    });
+  }
 }

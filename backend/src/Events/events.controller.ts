@@ -43,4 +43,10 @@ export class EventsController {
   ) {
     return this.eventService.updateEventStatus(id, data);
   }
+
+  @AdminOnly()
+  @Post(':id/cancel')
+  cancelEvent(@Param('id', ParseUUIDPipe) id: string) {
+    return this.eventService.cancelEvent(id);
+  }
 }
