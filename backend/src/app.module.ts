@@ -16,6 +16,7 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RoleGuard } from './common/guards/roles.guard';
 import { Event } from './Events/entities/event.entity';
 import { TicketModule } from './Tickets/tickets.module';
+import { RedisModule } from './common/redis/redis.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { TicketModule } from './Tickets/tickets.module';
     AuthModule,
     EventsModule,
     TicketModule,
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [
