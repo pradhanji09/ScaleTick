@@ -26,3 +26,17 @@ export const ErrInternalServer = RestErrorProvider.create({
   message: 'Something went wrong please try again later',
   code: 'INTERNAL_SERVER_ERROR',
 });
+
+export const IdempotencyKeyMissing = RestErrorProvider.create({
+  httpCode: 400,
+  title: 'Bad Request',
+  message: 'x-idempotency-key header is required',
+  code: 'IDEMPOTENCY_KEY_MISSING',
+});
+
+export const RequestProcessing = RestErrorProvider.create({
+  httpCode: 409,
+  title: 'Request In Progress',
+  message: 'Request is already being processed please wait and retry',
+  code: 'REQUEST_ALREADY_PROCESSING',
+});
