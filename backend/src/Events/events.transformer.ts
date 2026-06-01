@@ -25,7 +25,7 @@ export class EventTransformer {
       }),
       total_tickets: event.total_tickets,
       available_tickets: event.available_tickets,
-      price: event.price,
+      price: Number(event.price),
       status: event.status,
       starts_at: event.starts_at,
       // ends_at: event.ends_at,

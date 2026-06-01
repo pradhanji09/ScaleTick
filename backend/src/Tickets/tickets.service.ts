@@ -1,11 +1,17 @@
 import { Ticket } from './entities/ticket.entity';
 import { TicketStatus } from './../common/enums/ticket-status.enum';
 import { Injectable } from '@nestjs/common';
-import { EntityManager, In } from 'typeorm';
+import { EntityManager, In, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { TicketTransformer } from './tickets.tranformer';
+import { TicketResponse } from './tickets.types';
 
 @Injectable()
 export class TicketsService {
-  constructor() {}
+  constructor(
+    @InjectRepository(Ticket)
+    private readonly ticketRepository: Repository<Ticket>,
+  ) {}
 
   async bulkTicketGenerate({
     eventId,
@@ -49,5 +55,19 @@ export class TicketsService {
         status: TicketStatus.CANCELLED,
       },
     );
+  }
+
+  async getAvailableTicketsByEventId(
+    eventId: string,
+  ): Promise<TicketResponse[]> {
+    const tickets = await this.ticketRepository.find({
+      where: {
+        eventId,
+        status: TicketStatus.AVAILABLE,
+      },
+      order: { seat_number: 'ASC' },
+    });
+
+    return tickets.map((ticket) => TicketTransformer.toResponse(ticket));
   }
 }

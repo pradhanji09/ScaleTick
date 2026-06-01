@@ -49,4 +49,10 @@ export class EventsController {
   cancelEvent(@Param('id', ParseUUIDPipe) id: string) {
     return this.eventService.cancelEvent(id);
   }
+
+  @Public()
+  @Get(':id/tickets')
+  findAvailableTickets(@Param('id', ParseUUIDPipe) id: string) {
+    return this.eventService.getAvailableTickets(id);
+  }
 }

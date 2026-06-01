@@ -6,6 +6,7 @@ import {
   EventEndBeforeStart,
   EventNotFound,
   InvalidStatusTransition,
+  EventNotLive,
 } from './events.errors';
 import { EventTransformer } from './events.transformer';
 import { TicketsService } from './../Tickets/tickets.service';
@@ -98,5 +99,15 @@ export class EventsService {
       await this.ticketService.cancelTicketsForEvent(id, manager);
       return EventTransformer.toResponse(savedEvent);
     });
+  }
+
+  async getAvailableTickets(id: string) {
+    const event = await this.getEventById(id);
+    if (event.status !== EventStatus.LIVE) throw EventNotLive;
+
+    const availableTickets =
+      await this.ticketService.getAvailableTicketsByEventId(id);
+
+    return { ...event, tickets: availableTickets };
   }
 }
