@@ -36,7 +36,7 @@ export class Order {
   user: User;
 
   @Column({ name: 'user_id' })
-  userId: string;
+  userId: number;
 
   @ManyToOne(() => Event, { nullable: false })
   @JoinColumn({ name: 'event_id' })
@@ -50,7 +50,7 @@ export class Order {
   ticket: Ticket;
 
   @Column({ name: 'ticket_id' })
-  tickeId: string;
+  ticketId: string;
 
   @CreateDateColumn()
   created_at: Date;

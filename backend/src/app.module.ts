@@ -1,3 +1,4 @@
+import { OrderModule } from './Orders/orders.module';
 import { EventsModule } from './Events/events.module';
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
@@ -48,6 +49,7 @@ import { RedisModule } from './common/redis/redis.module';
     EventsModule,
     TicketModule,
     RedisModule,
+    OrderModule,
   ],
   controllers: [AppController],
   providers: [

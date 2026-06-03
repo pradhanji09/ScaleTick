@@ -8,7 +8,7 @@ export class TicketTransformer {
       seat_number: ticket.seat_number,
       status: ticket.status,
       price: Number(ticket.price),
-      // eventId: ticket.eventId,
+      eventId: ticket.eventId,
     };
   }
 }

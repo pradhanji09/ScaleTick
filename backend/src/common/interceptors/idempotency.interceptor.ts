@@ -9,9 +9,10 @@ import {
 import { Observable, tap } from 'rxjs';
 import { FastifyRequest, FastifyReply } from 'fastify';
 import {
-  IdempotencyKeyMissing,
+  InvalidIdempotencyKey,
   RequestProcessing,
 } from '../errors/common.errors';
+import { isUUID } from 'class-validator';
 
 interface AuthenticatedRequest extends FastifyRequest {
   user?: { id: string };
@@ -34,7 +35,7 @@ export class IdempotencyInterceptor implements NestInterceptor {
     const reply = context.switchToHttp().getResponse<FastifyReply>();
 
     const idempotencyKey = req.headers['x-idempotency-key'] as string;
-    if (!idempotencyKey) throw IdempotencyKeyMissing;
+    if (!isUUID(idempotencyKey)) throw InvalidIdempotencyKey;
 
     const userId = req.user?.id;
     const redisKey = `idempotency:${userId}:${idempotencyKey}`;

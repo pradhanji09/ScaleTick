@@ -12,7 +12,7 @@ import { EventTransformer } from './events.transformer';
 import { TicketsService } from './../Tickets/tickets.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { Injectable } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, EntityManager, Repository } from 'typeorm';
 import { Event } from './../Events/entities/event.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EventResponse } from './events.types';
@@ -109,5 +109,24 @@ export class EventsService {
       await this.ticketService.getAvailableTicketsByEventId(id);
 
     return { ...event, tickets: availableTickets };
+  }
+
+  async deductInventory(eventId: string, manager: EntityManager) {
+    await manager.decrement(Event, { id: eventId }, 'available_tickets', 1);
+
+    // new count
+    const updatedEvent = await manager.findOne(Event, {
+      where: { id: eventId },
+      select: ['id', 'available_tickets'],
+    });
+
+    // state transition
+    if (updatedEvent && updatedEvent.available_tickets <= 0) {
+      await manager.update(
+        Event,
+        { id: eventId },
+        { status: EventStatus.SOLD_OUT },
+      );
+    }
   }
 }

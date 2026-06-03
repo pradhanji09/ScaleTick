@@ -1,3 +1,4 @@
+import { TicketAlreadyBooked, TicketNotFound } from './tickets.error';
 import { Ticket } from './entities/ticket.entity';
 import { TicketStatus } from './../common/enums/ticket-status.enum';
 import { Injectable } from '@nestjs/common';
@@ -69,5 +70,30 @@ export class TicketsService {
     });
 
     return tickets.map((ticket) => TicketTransformer.toResponse(ticket));
+  }
+
+  async getTicketById(id: string) {
+    const ticket = await this.ticketRepository.findOne({
+      where: { id },
+    });
+    if (!ticket) throw TicketNotFound;
+
+    return TicketTransformer.toResponse(ticket);
+  }
+
+  async reserveTicket(ticketId: string, manager: EntityManager) {
+    const ticketInTx = await manager.findOne(Ticket, {
+      where: { id: ticketId },
+      lock: { mode: 'pessimistic_write' },
+    });
+
+    if (!ticketInTx || ticketInTx.status !== TicketStatus.AVAILABLE)
+      throw TicketAlreadyBooked;
+
+    await manager.update(
+      Ticket,
+      { id: ticketId },
+      { status: TicketStatus.RESERVED },
+    );
   }
 }

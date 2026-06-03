@@ -27,11 +27,11 @@ export const ErrInternalServer = RestErrorProvider.create({
   code: 'INTERNAL_SERVER_ERROR',
 });
 
-export const IdempotencyKeyMissing = RestErrorProvider.create({
+export const InvalidIdempotencyKey = RestErrorProvider.create({
   httpCode: 400,
   title: 'Bad Request',
-  message: 'x-idempotency-key header is required',
-  code: 'IDEMPOTENCY_KEY_MISSING',
+  message: 'x-idempotency-key must be a valid UUID',
+  code: 'INVALID_IDEMPOTENCY_KEY',
 });
 
 export const RequestProcessing = RestErrorProvider.create({
@@ -39,4 +39,11 @@ export const RequestProcessing = RestErrorProvider.create({
   title: 'Request In Progress',
   message: 'Request is already being processed please wait and retry',
   code: 'REQUEST_ALREADY_PROCESSING',
+});
+
+export const LockAcquisitionFailed = RestErrorProvider.create({
+  httpCode: 503,
+  title: 'Service Temporarily Unavailable',
+  message: 'Unable to process booking at this moment please try again',
+  code: 'LOCK_ACQUISITION_FAILED',
 });
