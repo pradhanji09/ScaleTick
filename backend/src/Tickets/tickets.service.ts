@@ -93,7 +93,7 @@ export class TicketsService {
     await manager.update(
       Ticket,
       { id: ticketId },
-      { status: TicketStatus.RESERVED },
+      { status: TicketStatus.SOLD },
     );
   }
 }

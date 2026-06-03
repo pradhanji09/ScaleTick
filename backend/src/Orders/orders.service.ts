@@ -1,3 +1,5 @@
+import { GetOrdersDto } from './dto/get-orders.dto';
+import { OrderResponse, OrderDetailResponse } from './orders.type';
 import { OrderTransformer } from './orders.transformer';
 import { OrderStatus } from './../common/enums/order-status.enum';
 import { Order } from './entities/order.entity';
@@ -10,21 +12,28 @@ import { User } from './../Users/entities/user.entity';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { EventsService } from './../Events/events.service';
 import { Injectable } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { TicketDoesNotBelongToEvent } from 'src/Tickets/tickets.error';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class OrdersService {
   private readonly LOCK_TTL = 10;
 
   constructor(
+    @InjectRepository(Order)
+    private readonly orderRepository: Repository<Order>,
     private readonly dataSource: DataSource,
     private readonly eventService: EventsService,
     private readonly ticketService: TicketsService,
     private readonly redisService: RedisService,
   ) {}
 
-  async createOrder(body: CreateOrderDto, user: User, idempotencyKey: string) {
+  async createOrder(
+    body: CreateOrderDto,
+    user: User,
+    idempotencyKey: string,
+  ): Promise<OrderResponse> {
     const { id: userId } = user;
     const { eventId, ticketId } = body;
 
@@ -52,7 +61,7 @@ export class OrdersService {
           eventId,
           ticketId,
           amount: event.price,
-          status: OrderStatus.PENDING,
+          status: OrderStatus.CONFIRMED,
         });
 
         const savedOrder = await manager.save(Order, orderEntity);
@@ -65,5 +74,39 @@ export class OrdersService {
     } finally {
       await this.redisService.releaseLock(lockKey, lockToken);
     }
+  }
+
+  async getMyOrderList(
+    user: User,
+    query: GetOrdersDto,
+  ): Promise<{ data: OrderDetailResponse[]; meta: object }> {
+    const { id: userId } = user;
+    const { status, page = 1, limit = 10 } = query;
+    const skip = (page - 1) * limit;
+
+    const whereClause: Record<string, any> = {
+      userId,
+    };
+    if (status) {
+      whereClause.status = status;
+    }
+
+    const [orders, total] = await this.orderRepository.findAndCount({
+      where: whereClause,
+      order: { created_at: 'DESC' },
+      take: limit,
+      skip: skip,
+      relations: ['event', 'ticket'],
+    });
+
+    return {
+      data: orders.map((order) => OrderTransformer.toDetailResponse(order)),
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 }

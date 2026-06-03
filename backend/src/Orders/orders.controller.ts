@@ -4,16 +4,24 @@ import { IdempotencyInterceptor } from './../common/interceptors/idempotency.int
 import {
   Body,
   Controller,
+  Get,
   Headers,
   Post,
+  Query,
   UseInterceptors,
 } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrdersService } from './orders.service';
+import { GetOrdersDto } from './dto/get-orders.dto';
 
 @Controller('orders')
 export class OrdersCntroller {
   constructor(private readonly orderService: OrdersService) {}
+
+  @Get('/my-orders')
+  getMyOrders(@CurrentUser() user: User, @Query() query: GetOrdersDto) {
+    return this.orderService.getMyOrderList(user, query);
+  }
 
   @UseInterceptors(IdempotencyInterceptor)
   @Post('/book')
