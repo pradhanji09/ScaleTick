@@ -1,7 +1,7 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Injectable, Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
-import { QUEUE_NAMES, JOB_NAMES } from '../queue.constants';
+import { QUEUE_NAMES, JOB_NAMES } from '../../common/queue/queue.constants';
 
 export type OrderConfirmationJob = {
   orderId: string;

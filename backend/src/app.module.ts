@@ -1,4 +1,4 @@
-import { QueueModule } from './queue/queue.module';
+import { QueueModule } from './common/queue/queue.module';
 import { OrderModule } from './Orders/orders.module';
 import { EventsModule } from './Events/events.module';
 import { Module } from '@nestjs/common';

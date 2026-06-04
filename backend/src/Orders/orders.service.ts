@@ -1,3 +1,4 @@
+import { JOB_NAMES, QUEUE_NAMES } from '../common/queue/queue.constants';
 import { GetOrdersDto } from './dto/get-orders.dto';
 import { OrderResponse, OrderDetailResponse } from './orders.type';
 import { OrderTransformer } from './orders.transformer';
@@ -15,6 +16,8 @@ import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { TicketDoesNotBelongToEvent } from 'src/Tickets/tickets.error';
 import { InjectRepository } from '@nestjs/typeorm';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
 @Injectable()
 export class OrdersService {
@@ -23,6 +26,8 @@ export class OrdersService {
   constructor(
     @InjectRepository(Order)
     private readonly orderRepository: Repository<Order>,
+    @InjectQueue(QUEUE_NAMES.ORDER)
+    private readonly orderQueue: Queue,
     private readonly dataSource: DataSource,
     private readonly eventService: EventsService,
     private readonly ticketService: TicketsService,
@@ -68,6 +73,14 @@ export class OrdersService {
         await this.eventService.deductInventory(eventId, manager);
 
         return savedOrder;
+      });
+
+      await this.orderQueue.add(JOB_NAMES.ORDER_CONFIRMATION, {
+        orderId: order.id,
+        userEmail: user.email,
+        eventTitle: event.event_title,
+        seatNumber: ticket.seat_number,
+        amount: Number(event.price),
       });
 
       return OrderTransformer.toResponse(order);

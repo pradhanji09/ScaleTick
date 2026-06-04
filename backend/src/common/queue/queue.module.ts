@@ -1,6 +1,6 @@
 import { EventsModule } from 'src/Events/events.module';
-import { EventProcessor } from './processors/event.processor';
-import { OrderProcessor } from './processors/order.processor';
+import { EventProcessor } from '../../Events/queue/event.processor';
+import { OrderProcessor } from '../../Orders/queue/order.processor';
 import { Module, Global } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { ConfigModule, ConfigService } from '@nestjs/config';

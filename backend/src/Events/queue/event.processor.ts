@@ -1,9 +1,9 @@
 import { EventStatus } from '../../common/enums/event-status.enum';
-import { EventsService } from '../../Events/events.service';
+import { EventsService } from '../events.service';
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { Logger, Injectable } from '@nestjs/common';
-import { QUEUE_NAMES, JOB_NAMES } from '../queue.constants';
+import { QUEUE_NAMES, JOB_NAMES } from '../../common/queue/queue.constants';
 
 export type EventLifecycleJob = {
   eventId: string;

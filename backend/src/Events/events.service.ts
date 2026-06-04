@@ -1,3 +1,4 @@
+import { EventQueueService } from './queue/event-queue.service';
 import { EventStateMachine } from './transitions/event-transitions';
 import { EventStatus } from './../common/enums/event-status.enum';
 import {
@@ -23,6 +24,7 @@ export class EventsService {
   constructor(
     @InjectRepository(Event)
     private readonly eventRepository: Repository<Event>,
+    private readonly eventQueueService: EventQueueService,
     private readonly ticketService: TicketsService,
     private readonly dataSource: DataSource,
   ) {}
@@ -77,28 +79,39 @@ export class EventsService {
     if (!canTransition) throw InvalidStatusTransition;
 
     event.status = data.status;
-    const updated = await this.eventRepository.save(event);
+    const updatedEvent = await this.eventRepository.save(event);
 
-    return EventTransformer.toResponse(updated);
+    const isTransitionToSchedule =
+      updatedEvent.status === EventStatus.SCHEDULED;
+    if (isTransitionToSchedule) {
+      await this.eventQueueService.scheduleLifecycle(updatedEvent);
+    }
+
+    return EventTransformer.toResponse(updatedEvent);
   }
 
   async cancelEvent(id: string) {
-    return await this.dataSource.transaction(async (manager) => {
-      const event = await manager.findOne(Event, { where: { id } });
-      if (!event) throw EventNotFound;
+    const cancalledEvent = await this.dataSource.transaction(
+      async (manager) => {
+        const event = await manager.findOne(Event, { where: { id } });
+        if (!event) throw EventNotFound;
 
-      const canTransition = EventStateMachine.canTransition(
-        event.status,
-        EventStatus.CANCELLED,
-      );
-      if (!canTransition) throw InvalidStatusTransition;
+        const canTransition = EventStateMachine.canTransition(
+          event.status,
+          EventStatus.CANCELLED,
+        );
+        if (!canTransition) throw InvalidStatusTransition;
 
-      event.status = EventStatus.CANCELLED;
-      const savedEvent = await manager.save(Event, event);
+        event.status = EventStatus.CANCELLED;
+        const savedEvent = await manager.save(Event, event);
+        await this.ticketService.cancelTicketsForEvent(id, manager);
+        return savedEvent;
+      },
+    );
 
-      await this.ticketService.cancelTicketsForEvent(id, manager);
-      return EventTransformer.toResponse(savedEvent);
-    });
+    await this.eventQueueService.cancelLifecycle(cancalledEvent.id);
+
+    return EventTransformer.toResponse(cancalledEvent);
   }
 
   async getAvailableTickets(id: string) {
