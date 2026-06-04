@@ -1,3 +1,4 @@
+import { EventQueueService } from './queue/event-queue.service';
 import { TicketModule } from './../Tickets/tickets.module';
 import { Module } from '@nestjs/common';
 import { EventsController } from './events.controller';
@@ -8,7 +9,7 @@ import { Event } from './entities/event.entity';
 @Module({
   imports: [TypeOrmModule.forFeature([Event]), TicketModule],
   controllers: [EventsController],
-  providers: [EventsService],
+  providers: [EventsService, EventQueueService],
   exports: [EventsService],
 })
 export class EventsModule {}
