@@ -14,10 +14,14 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { EventsService } from './../Events/events.service';
 import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
-import { TicketDoesNotBelongToEvent } from 'src/Tickets/tickets.error';
+import {
+  TicketAlreadyBooked,
+  TicketDoesNotBelongToEvent,
+} from 'src/Tickets/tickets.error';
 import { InjectRepository } from '@nestjs/typeorm';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
+import { TicketStatus } from 'src/common/enums/ticket-status.enum';
 
 @Injectable()
 export class OrdersService {
@@ -47,6 +51,7 @@ export class OrdersService {
 
     const ticket = await this.ticketService.getTicketById(ticketId);
     if (ticket.eventId !== event.id) throw TicketDoesNotBelongToEvent;
+    if (ticket.status === TicketStatus.SOLD) throw TicketAlreadyBooked;
 
     const lockKey = `lock:ticket:${ticketId}`;
 
