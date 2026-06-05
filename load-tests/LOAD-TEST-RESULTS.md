@@ -172,3 +172,13 @@ docker run --rm -i grafana/k6 run - <load-tests/idempotency.test.js
 | Stale idempotency key         | 24h TTL + database permanent record |
 | Event oversold                | Atomic available_tickets decrement  |
 | Lock held forever on crash    | 10s TTL auto-expiry                 |
+
+## Scale Targets
+
+Tested locally at 100 concurrent VUs.
+Architecture designed for horizontal scaling.
+Production capacity depends on:
+Database connection pool size
+Redis memory and connection limits
+Number of NestJS instances behind load balancer
+PostgreSQL hardware specs
