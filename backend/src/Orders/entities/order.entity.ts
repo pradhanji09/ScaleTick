@@ -10,10 +10,13 @@ import {
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  Index,
 } from 'typeorm';
 import { OrderStatus } from '../../common/enums/order-status.enum';
 
 @Entity('orders')
+@Index(['userId', 'status', 'created_at'])
+@Index(['userId'])
 export class Order {
   @PrimaryGeneratedColumn('uuid')
   id: string;
