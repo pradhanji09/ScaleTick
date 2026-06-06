@@ -1,3 +1,4 @@
+import { HealthModule } from './Health/health.module';
 import { QueueModule } from './common/queue/queue.module';
 import { OrderModule } from './Orders/orders.module';
 import { EventsModule } from './Events/events.module';
@@ -52,6 +53,7 @@ import { RedisModule } from './common/redis/redis.module';
     RedisModule,
     OrderModule,
     QueueModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [

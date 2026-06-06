@@ -66,4 +66,8 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
     await this.client.eval(luaScript, 1, key, token);
   }
+
+  async ping(): Promise<void> {
+    await this.client.ping();
+  }
 }
