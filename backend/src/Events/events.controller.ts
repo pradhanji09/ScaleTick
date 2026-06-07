@@ -12,6 +12,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { EventsService } from './events.service';
+import { SkipThrottle } from '@nestjs/throttler';
 
 @Controller('events')
 export class EventsController {
@@ -23,6 +24,7 @@ export class EventsController {
     return this.eventService.createEvent(data);
   }
 
+  @SkipThrottle()
   @Public()
   @Get()
   getAllEvent() {

@@ -13,6 +13,7 @@ import {
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrdersService } from './orders.service';
 import { GetOrdersDto } from './dto/get-orders.dto';
+import { Throttle } from '@nestjs/throttler';
 
 @Controller('orders')
 export class OrdersCntroller {
@@ -23,6 +24,7 @@ export class OrdersCntroller {
     return this.orderService.getMyOrderList(user, query);
   }
 
+  @Throttle({ default: { ttl: 60000, limit: 10 } }) // 10req/60s
   @UseInterceptors(IdempotencyInterceptor)
   @Post('/book')
   bookTicket(
