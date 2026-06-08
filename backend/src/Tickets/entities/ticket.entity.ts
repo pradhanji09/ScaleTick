@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 
 import { TicketStatus } from '../../common/enums/ticket-status.enum';
-import { Event } from 'src/Events/entities/event.entity';
+import { Event } from './../../Events/entities/event.entity';
 
 @Entity('tickets')
 @Index(['eventId', 'status']) // Optimizes available tickets fetch

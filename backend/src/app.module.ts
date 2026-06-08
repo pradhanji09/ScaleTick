@@ -21,6 +21,8 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis';
 import { dataSourceOptions } from './common/database/data-source';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const { entities, migrations, ...safeNestOptions } = dataSourceOptions;
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -33,7 +35,7 @@ import { dataSourceOptions } from './common/database/data-source';
       useFactory: (config: ConfigService) => createLoggerConfig(config),
     }),
     TypeOrmModule.forRoot({
-      ...dataSourceOptions,
+      ...safeNestOptions,
       autoLoadEntities: true,
     }),
 

@@ -1,6 +1,6 @@
 import { OrdersService } from './orders.service';
 import { OrdersCntroller } from './orders.controller';
-import { EventsModule } from 'src/Events/events.module';
+import { EventsModule } from './../Events/events.module';
 import { TicketModule } from './../Tickets/tickets.module';
 import { Order } from './entities/order.entity';
 import { Module } from '@nestjs/common';

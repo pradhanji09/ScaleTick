@@ -17,11 +17,11 @@ import { DataSource, Repository } from 'typeorm';
 import {
   TicketAlreadyBooked,
   TicketDoesNotBelongToEvent,
-} from 'src/Tickets/tickets.error';
+} from './../Tickets/tickets.error';
 import { InjectRepository } from '@nestjs/typeorm';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
-import { TicketStatus } from 'src/common/enums/ticket-status.enum';
+import { TicketStatus } from './../common/enums/ticket-status.enum';
 
 @Injectable()
 export class OrdersService {

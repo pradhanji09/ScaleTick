@@ -1,7 +1,7 @@
 import { userResponse } from './../Users/users.types';
 import { loginResponse } from './auth.types';
 import { userTransformer } from './../Users/users.transformer';
-import { UsersService } from 'src/Users/users.service';
+import { UsersService } from './../Users/users.service';
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';

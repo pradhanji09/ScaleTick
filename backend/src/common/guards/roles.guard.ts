@@ -1,4 +1,4 @@
-import { JwtPayload } from 'src/Auth/strategies/jwt.strategy';
+import { JwtPayload } from './../../Auth/strategies/jwt.strategy';
 import { Reflector } from '@nestjs/core';
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { ROLES_KEY } from '../decorators/roles.decorator';

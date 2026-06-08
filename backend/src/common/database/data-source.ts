@@ -7,7 +7,7 @@ config({ path: resolve(process.cwd(), '../.env') });
 export const dataSourceOptions: DataSourceOptions = {
   type: 'postgres',
   host: process.env.POSTGRES_HOST,
-  port: parseInt(process.env.POSTGRES_PORT!),
+  port: parseInt(process.env.POSTGRES_PORT || '5433'),
   username: process.env.POSTGRES_USER,
   password: process.env.POSTGRES_PASSWORD,
   database: process.env.POSTGRES_DB,
@@ -16,7 +16,7 @@ export const dataSourceOptions: DataSourceOptions = {
   migrations: [join(__dirname, '../../../migrations/*{.ts,.js}')],
 
   extra: {
-    max: parseInt(process.env.DB_POOL_MAX || '20', 10),
+    max: parseInt(process.env.DB_POOL_MAX || '20'),
     min: 5,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 2000,
