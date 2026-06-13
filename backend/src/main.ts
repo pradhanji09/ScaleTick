@@ -7,6 +7,7 @@ import {
 import { AppModule } from './app.module';
 import { Logger } from 'nestjs-pino';
 import { ValidationPipe } from '@nestjs/common';
+import { setupSwagger } from './common/swagger/swagger.config';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -23,6 +24,7 @@ async function bootstrap() {
     }),
   );
   app.useGlobalFilters(new AllExceptionsFilter());
+  setupSwagger(app);
 
   const port = process.env.PORT ?? 3000;
   await app.listen(port, '0.0.0.0');
