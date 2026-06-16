@@ -1,634 +1,276 @@
-# ScaleTick ⚡
+<div align="center">
+  <h1>🎟️ ScaleTick</h1>
+  <p><strong>A production-grade flash sale and ticketing engine</strong></p>
+  <p>Built to handle thousands of users competing for limited tickets at the exact same moment, with <b>zero overselling</b> and <b>zero duplicate orders</b>.</p>
 
-> A production-grade flash sale and ticketing engine — built to handle thousands of users competing for limited tickets at the exact same moment, with zero overselling and zero duplicate orders.
+  <img src="https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white" alt="NestJS"/>
+  <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL"/>
+  <img src="https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white" alt="Redis"/>
+  <img src="https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white" alt="Docker"/>
+  <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript"/>
+</div>
 
 ---
 
 ## 🤔 What Problem Does This Solve?
 
-Imagine a Coldplay concert announces tickets at 10:00 AM.
+Imagine a major concert announces tickets at 10:00 AM.
 
-```
-10:00:00.000 AM — Tickets go live
-10:00:00.001 AM — 10,000 users click "Buy" simultaneously
-10:00:00.002 AM — Only 500 tickets available
+- **10:00:00.000 AM** — Tickets go live
+- **10:00:00.001 AM** — 10,000 users click "Buy" simultaneously
+- **10:00:00.002 AM** — Only 500 tickets are available
 
-What happens without proper engineering?
-  → Same ticket sold to multiple people
-  → Server crashes under load
-  → User charged twice from double-clicking
-  → Data corruption in database
+### ❌ What happens without proper engineering?
 
-What ScaleTick guarantees?
-  → Exactly 500 tickets sold — never more
-  → Server stays alive under load
-  → Double-click = safe, one charge only
-  → Zero data corruption
-```
+- The same ticket is sold to multiple people.
+- The server crashes under immense load.
+- Users are charged twice due to double-clicking.
+- Data corruption occurs in the database.
 
-This is the same problem solved by BookMyShow, IRCTC, and Zomato every day.
+### ✅ What ScaleTick Guarantees:
+
+- **Exactly 500 tickets sold** — never more.
+- Server stays responsive and stable under load.
+- Double-clicks are safe — users are only charged once.
+- Zero data corruption.
+
+> _This is the exact problem solved by ticketing giants like BookMyShow, IRCTC, and LiveNation._
 
 ---
 
-## ⚡ Live Demo
+## ⚡ Quick Start & Live Demo
+
+> **Note:** The setup steps have been unified to provide a single, reliable way to get the project running locally in seconds.
 
 ```bash
-# Clone and run with one command
-git clone https://github.com/pradhanji09/ScaleTick
-cd scaletick/backend
+# 1. Clone the repository
+git clone https://github.com/pradhanji09/ScaleTick.git
+cd ScaleTick/backend
+
+# 2. Setup Environment Variables
+cp .env.example .env
+
+# 3. Start Infrastructure (PostgreSQL & Redis)
 docker compose up -d
+
+# 4. Install Dependencies & Run
 npm install
 npm run start:dev
-
-# API Explorer
-open http://localhost:3000/api/docs
-
-# Health Check
-open http://localhost:3000/health
 ```
+
+### 🧭 Explore the App
+
+- **API Explorer (Swagger):** [http://localhost:3000/api/docs](http://localhost:3000/api/docs)
+- **Health Check:** [http://localhost:3000/health](http://localhost:3000/health)
 
 ---
 
 ## 🏗️ System Architecture
 
-```
-                         ┌─────────────────────────────┐
-                         │         CLIENT              │
-                         │  (Postman / Frontend App)   │
-                         └──────────────┬──────────────┘
-                                        │ HTTP Request
-                                        ▼
-                         ┌─────────────────────────────┐
-                         │      NestJS + Fastify       │
-                         │                             │
-                         │  ┌─────────────────────┐    │
-                         │  │   Auth Guard        │    │  ← Is user logged in?
-                         │  │   Roles Guard       │    │  ← Is user admin?
-                         │  │   Throttler Guard   │    │  ← Too many requests?
-                         │  │   Idempotency Guard │    │  ← Duplicate request?
-                         │  └──────────┬──────────┘    │
-                         │             │               │
-                         │  ┌──────────▼──────────┐    │
-                         │  │    Controller       │    │  ← Route handler
-                         │  └──────────┬──────────┘    │
-                         │             │               │
-                         │  ┌──────────▼──────────┐    │
-                         │  │     Service         │    │  ← Business logic
-                         │  └──────────┬──────────┘    │
-                         └─────────────┼───────────────┘
-                                       │
-               ┌───────────────────────┼───────────────────────┐
-               │                       │                       │
-               ▼                       ▼                       ▼
-  ┌────────────────────┐  ┌────────────────────┐  ┌─────────────────────┐
-  │    PostgreSQL      │  │       Redis        │  │       BullMQ        │
-  │                    │  │                    │  │                     │
-  │  Permanent storage │  │  Distributed Lock  │  │  Async Job Queue    │
-  │  ACID transactions │  │  Idempotency Cache │  │  Email confirmation │
-  │  Indexed queries   │  │  Rate limit store  │  │  Event lifecycle    │
-  └────────────────────┘  └────────────────────┘  └─────────────────────┘
+```mermaid
+graph TD
+    Client[Client <br> Postman / Frontend App] -->|HTTP Request| API[NestJS + Fastify API]
+
+    subgraph NestJS Backend
+        Guards[Auth, Roles, Throttler, Idempotency Guards] --> Controller[Route Controller]
+        Controller --> Service[Business Logic Service]
+    end
+
+    API --> Guards
+    Service --> Postgres[(PostgreSQL <br> ACID DB)]
+    Service --> Redis[(Redis <br> Distributed Lock & Cache)]
+    Service --> Queue[(BullMQ <br> Async Jobs)]
 ```
 
 ---
 
-## 🎯 The Booking Flow — Step by Step
+## 🎯 The Booking Flow
 
 This is the most critical part of ScaleTick. Here is exactly what happens when you click "Book":
 
-```
-User clicks BOOK
-      │
-      ▼
-① IDEMPOTENCY CHECK (Redis)
-  Already seen this request? → Return cached response
-  Request in progress?       → Return 409, try again
-  New request?               → Mark as PROCESSING, continue
-      │
-      ▼
-② VALIDATE
-  Is event LIVE?             → No  → Reject
-  Does ticket belong here?   → No  → Reject
-  Is ticket available?       → No  → Reject
-      │
-      ▼
-③ ACQUIRE REDIS LOCK
-  Lock key: lock:ticket:{ticketId}
-  Got the lock?              → Continue
-  Lock taken by someone else → Return 503, retry
-      │
-      ▼
-④ DATABASE TRANSACTION
-  SELECT ticket FOR UPDATE   ← Pessimistic DB lock
-  Still available?           → Continue
-  Already taken?             → Reject, release lock
-      │
-  Mark ticket  → SOLD
-  Create order → CONFIRMED
-  Decrement available_tickets by 1
-  If available_tickets = 0 → Event → SOLD_OUT
-  COMMIT
-      │
-      ▼
-⑤ RELEASE REDIS LOCK
-  Uses Lua script for safe release
-  Only releases if WE own the lock
-      │
-      ▼
-⑥ CACHE RESPONSE (Redis)
-  Mark idempotency key as COMPLETED
-  Store response for 24 hours
-      │
-      ▼
-⑦ ASYNC JOB (BullMQ)
-  Push confirmation email job to queue
-  User does not wait for email
-  Response returned immediately
-      │
-      ▼
-✅ SUCCESS — Ticket is yours
-```
+1. **🛡️ Idempotency Check (Redis)**
+   - Already seen this request? → _Return cached response_
+   - Request in progress? → _Return `409 Conflict`, try again_
+   - New request? → _Mark as `PROCESSING`, continue_
+2. **✅ Validation**
+   - Is event `LIVE`? Is ticket available? → _If no, reject._
+3. **🔒 Acquire Redis Lock**
+   - Lock key: `lock:ticket:{ticketId}`
+   - If locked by someone else, return `503 Service Unavailable` to retry.
+4. **💽 Database Transaction (Pessimistic Lock)**
+   - `SELECT ticket FOR UPDATE`
+   - Mark ticket `SOLD`, create order `CONFIRMED`.
+   - Decrement `available_tickets`. If `0`, set event to `SOLD_OUT`.
+   - `COMMIT`
+5. **🔓 Release Redis Lock**
+   - Safe release using a Lua script to ensure we only release our own lock.
+6. **💾 Cache Response**
+   - Mark idempotency key as `COMPLETED` and store for 24 hours.
+7. **📨 Async Job (BullMQ)**
+   - Push confirmation email job to queue (returns response to user immediately without waiting).
+
+---
+
+## 🛡️ Core Defense Mechanisms
+
+### 1. Preventing Overselling
+
+We use a **Two-Layer Protection** strategy:
+
+- **Layer 1: Redis Distributed Lock:** "Only one booking can process a specific ticket at a time." (NX, EX 10)
+- **Layer 2: PostgreSQL Pessimistic Lock:** "Even if two requests slip through, the database guarantees only one wins." (`SELECT ... FOR UPDATE`)
+
+### 2. Preventing Double Charging
+
+- **Idempotency Keys:** The client generates a UUID before clicking. If the network drops and they click again, the server recognizes the `x-idempotency-key` in Redis, skips processing, and returns the cached success response.
 
 ---
 
 ## 🧠 Design Patterns Used
 
-### 1. Finite State Machine (FSM) — Event Lifecycle
-
-An event cannot jump to any status randomly. Every transition is controlled.
-
-```
-                    ┌──────────┐
-                    │  DRAFT   │  ← Created by admin
-                    └────┬─────┘
-                         │ Admin schedules
-                         ▼
-                    ┌──────────┐
-                    │SCHEDULED │  ← Visible to users
-                    └────┬─────┘
-                         │ BullMQ job fires at starts_at
-                         ▼
-              ┌──────────────────────┐
-              │         LIVE         │  ← Booking open
-              └──┬──────────────┬────┘
-                 │              │
-    All tickets  │              │ Time expires
-    sold out     │              │ (BullMQ auto-fires)
-                 ▼              ▼
-           ┌─────────┐    ┌─────────┐
-           │SOLD_OUT │    │  ENDED  │
-           └─────────┘    └─────────┘
-
-  At any point before ENDED:
-           ┌───────────┐
-           │ CANCELLED │  ← Admin action
-           └───────────┘
-```
-
-Illegal transitions are **impossible by design**. You cannot go from ENDED back to LIVE.
-
----
-
-### 2. Strategy Pattern — Pricing
-
-Different events can have different pricing logic without changing core code.
-
-```
-                    ┌─────────────────┐
-                    │ PricingStrategy │  ← Interface
-                    │ calculatePrice()│
-                    └────────┬────────┘
-                             │
-              ┌──────────────┼──────────────┐
-              │              │              │
-              ▼              ▼              ▼
-    ┌──────────────┐ ┌────────────┐ ┌─────────────┐
-    │FixedPricing  │ │EarlyBird   │ │DynamicPrice │
-    │              │ │Pricing     │ │(AI-powered) │
-    │₹499 always   │ │First 20%   │ │Rises with   │
-    │              │ │get 30% off │ │demand       │
-    └──────────────┘ └────────────┘ └─────────────┘
-
-Add new pricing model = new class only
-Zero changes to existing code
-Open/Closed Principle ✅
-```
-
----
-
-### 3. Factory Pattern — Event Creation
-
-Creating an event involves many decisions. The factory centralises all of it.
-
-```
-Controller says:
-  "Create me a flash sale event"
-          │
-          ▼
-  EventTransformer.toEventEntity(dto)
-          │
-          ▼
-  Returns complete entity with:
-    ✓ status = DRAFT (always starts here)
-    ✓ available_tickets = total_tickets
-    ✓ dates converted to Date objects
-    ✓ defaults applied
-
-Controller never knows HOW it's built.
-Single Responsibility Principle ✅
-```
-
----
-
-### 4. Transformer Pattern — Response Shaping
-
-Database entities are never returned directly. Transformers control what the API exposes.
-
-```
-Database Entity          API Response
-─────────────────        ─────────────────
-id         ────────────► id
-email      ────────────► email
-password   ──── HIDDEN ► (never exposed)
-isAdmin    ────────────► isAdmin
-createdAt  ────────────► createdAt
-updatedAt  ──── HIDDEN ► (internal only)
-
-UserTransformer.toResponse(user)
-  → Guaranteed password never leaks
-  → Same shape everywhere in codebase
-  → Change response = change one file
-```
-
----
-
-## 🔒 How We Prevent Overselling
-
-Two layers of protection working together:
-
-```
-Layer 1 — Redis Distributed Lock
-────────────────────────────────
-"Only one booking can process
- a specific ticket at a time"
-
-User A ──► SET lock:ticket:123 (NX EX 10)  ← Wins the lock
-User B ──► SET lock:ticket:123 (NX EX 10)  ← Lock exists, fails
-User C ──► SET lock:ticket:123 (NX EX 10)  ← Lock exists, fails
-
-Only User A proceeds.
-NX = only set if Not eXists (atomic)
-EX = auto-expire in 10s (crash safety)
-
-Lock Release Safety (Lua Script):
-  Each lock has a unique token.
-  Only the owner can release it.
-  Prevents Server A releasing Server B's lock.
-
-Layer 2 — PostgreSQL Pessimistic Lock
-──────────────────────────────────────
-"Even if two somehow get through,
- database guarantees only one wins"
-
-SELECT * FROM tickets
-WHERE id = ? FOR UPDATE  ← Row locked at DB level
-
-Inside transaction:
-  Re-check ticket status
-  If SOLD → reject
-  If AVAILABLE → mark SOLD, commit
-```
-
----
-
-## 🛡️ How We Prevent Double Charging
-
-```
-The Problem:
-  User clicks Buy
-  Network is slow
-  User clicks Buy again
-  Two requests, same moment
-  Two charges?
-
-The Solution — Idempotency:
-
-Client generates UUID before clicking:
-  idempotencyKey = "550e8400-e29b-41d4-a716-446655440000"
-
-Request 1 arrives:
-  Redis: key not found
-  SET key "PROCESSING" (atomic NX)
-  Process booking...
-  SET key "COMPLETED" + response
-  Return success
-
-Request 2 arrives (same key):
-  Redis: key = "PROCESSING"
-  Return 409 "Already processing"
-  Client retries after 1 second
-  Redis: key = "COMPLETED"
-  Return cached success response
-
-Result: One order. One charge. Always.
-```
+- **🚦 Finite State Machine (FSM):** Controls the Event lifecycle (`DRAFT` → `SCHEDULED` → `LIVE` → `SOLD_OUT` / `ENDED`). Illegal transitions are impossible.
+- **🏷️ Strategy Pattern:** Supports different pricing models (Fixed, EarlyBird, Dynamic) without modifying core code (Open/Closed Principle). [In Progres]
+- **🏭 Factory Pattern:** Centralizes complex Event creation, enforcing defaults and standardizing dates.
+- **🔄 Transformer Pattern:** Shapes API responses, guaranteeing that sensitive data (like passwords) never leaks from the DB to the client.
 
 ---
 
 ## 📊 Load Test Results
 
-Proven under real concurrent load using k6.
+Proven under real concurrent load using `k6`.
 
-### Test 1 — Concurrent Booking
+| Scenario               | Details                                             | Result                                                                                       |
+| ---------------------- | --------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| **Concurrent Booking** | 100 users hit "Book" simultaneously for 50 tickets. | **50 successful, 50 failed.** Exactly 50 tickets sold. 0 Overselling. 100% checks succeeded. |
+| **Idempotency**        | Same user, same key, 2 simultaneous requests.       | **1 successful, 1 blocked.** Double click is 100% safe.                                      |
 
-```
-Scenario: 100 users hit Book simultaneously
-          Only 50 tickets available
-
-┌─────────────────────────────────────────┐
-│  successful_bookings  :  50   ✅        │
-│  failed_bookings      :  50   ✅        │
-│  oversell_violations  :  0    ✅        │
-│  checks_succeeded     :  100% ✅        │
-│                                         │
-│  avg response time    :  627ms          │
-│  p95 response time    :  2.23s          │
-└─────────────────────────────────────────┘
-
-Result: Exactly 50 tickets sold.
-        Not 51. Not 49. Exactly 50.
-        Redis lock worked perfectly.
-```
-
-### Test 2 — Idempotency (Double Click)
-
-```
-Scenario: Same user, same key, 2 simultaneous requests
-
-┌─────────────────────────────────────────┐
-│  successful_bookings  :  1    ✅        │
-│  duplicate_blocked    :  1    ✅        │
-│  checks_succeeded     :  100% ✅        │
-└─────────────────────────────────────────┘
-
-Result: Only 1 order created.
-        Double click is completely safe.
-```
-
----
-
-## 🗄️ Database Schema
-
-```
-┌──────────────┐       ┌──────────────┐
-│    users     │       │    events    │
-│──────────────│       │──────────────│
-│ id (PK)      │       │ id (PK)      │
-│ email        │       │ event_title  │
-│ password     │       │ total_tickets│
-│ isAdmin      │       │ avail_tickets│
-│ createdAt    │       │ price        │
-└──────┬───────┘       │ status (FSM) │
-       │               │ starts_at    │
-       │               │ ends_at      │
-       │               └──────┬───────┘
-       │                      │
-       │               ┌──────▼───────┐
-       │               │   tickets    │
-       │               │──────────────│
-       │               │ id (PK)      │
-       │               │ seat_number  │
-       │               │ status       │
-       │               │ price        │
-       │               │ event_id(FK) │
-       │               └──────┬───────┘
-       │                      │
-       └──────────┐    ┌──────┘
-                  │    │
-              ┌───▼────▼─────┐
-              │    orders    │
-              │──────────────│
-              │ id (PK)      │
-              │ idempotency  │
-              │ _key         │
-              │ status       │
-              │ amount ◄─────┼── Price snapshot
-              │ user_id (FK) │   at booking time
-              │ event_id(FK) │
-              │ ticket_id(FK)│
-              └──────────────┘
-```
-
-**Database Indexes:**
-
-```
-orders(userId, eventId)    → booking duplicate check
-orders(userId)             → order history queries
-tickets(eventId, status)   → available ticket lookup
-tickets(eventId)           → bulk cancellation
-events(status)             → live event listing
-```
+_See [load-tests/LOAD_TEST_RESULTS.md](./load-tests/LOAD_TEST_RESULTS.md) for detailed reports._
 
 ---
 
 ## 🚀 Tech Stack
 
-| Layer      | Technology              | Why                                  |
-| ---------- | ----------------------- | ------------------------------------ |
-| Framework  | NestJS + Fastify        | Fast, structured, decorator-based    |
-| Language   | TypeScript              | Type safety, better DX               |
-| Database   | PostgreSQL              | ACID transactions, row-level locking |
-| ORM        | TypeORM                 | Data Mapper pattern, migrations      |
-| Cache/Lock | Redis + ioredis         | Atomic operations, distributed state |
-| Queue      | BullMQ                  | Persistent jobs, retry logic         |
-| Auth       | JWT + Passport + bcrypt | Industry standard                    |
-| Logger     | Pino                    | Fastest Node.js logger, JSON output  |
-| Docs       | Swagger                 | Auto-generated API explorer          |
-| Load Test  | k6                      | Industry standard load testing       |
-| Container  | Docker + docker-compose | One command setup                    |
+| Layer             | Technology              | Purpose                                           |
+| ----------------- | ----------------------- | ------------------------------------------------- |
+| **Framework**     | NestJS + Fastify        | Fast, structured, decorator-based API             |
+| **Language**      | TypeScript              | Type safety and enhanced DX                       |
+| **Database**      | PostgreSQL + TypeORM    | ACID transactions, row-level locking, ORM         |
+| **Cache & Lock**  | Redis + ioredis         | Atomic operations, distributed state              |
+| **Queue**         | BullMQ                  | Persistent background jobs, retry logic           |
+| **Auth**          | JWT + Passport + bcrypt | Industry-standard security                        |
+| **Ops & Testing** | Docker, Pino, k6        | Containerization, fast JSON logging, load testing |
+
+---
+
+## 🗄️ Database Schema
+
+```mermaid
+erDiagram
+    USERS ||--o{ ORDERS : places
+    EVENTS ||--o{ TICKETS : has
+    EVENTS ||--o{ ORDERS : includes
+    TICKETS ||--o{ ORDERS : linked_to
+
+    USERS {
+        uuid id PK
+        string email
+        string password
+        boolean isAdmin
+        datetime createdAt
+    }
+    EVENTS {
+        uuid id PK
+        string event_title
+        int total_tickets
+        int avail_tickets
+        float price
+        string status
+        datetime starts_at
+        datetime ends_at
+    }
+    TICKETS {
+        uuid id PK
+        string seat_number
+        string status
+        float price
+        uuid event_id FK
+    }
+    ORDERS {
+        uuid id PK
+        string idempotency_key
+        string status
+        float amount
+        uuid user_id FK
+        uuid event_id FK
+        uuid ticket_id FK
+    }
+```
 
 ---
 
 ## 📁 Project Structure
 
-```
+```text
 src/
 ├── auth/                    ← JWT auth, register, login
-│   ├── dto/                 ← Input validation
-│   ├── strategies/          ← Passport JWT strategy
-│   ├── auth.controller.ts
-│   ├── auth.service.ts
-│   ├── auth.errors.ts       ← Domain specific errors
-│   └── auth.module.ts
-│
-├── events/                  ← Flash sale management
-│   ├── dto/
-│   ├── entities/
-│   ├── transitions/         ← FSM state machine
-│   ├── events.transformer.ts
-│   ├── events.types.ts
-│   └── ...
-│
+├── events/                  ← Flash sale management & FSM transitions
 ├── tickets/                 ← Ticket inventory
 ├── orders/                  ← Core booking engine
-│
-├── common/
-│   ├── errors/              ← RestErrorProvider pattern
-│   ├── guards/              ← JWT, Roles, Throttler
-│   ├── decorators/          ← @Public, @AdminOnly, @CurrentUser
-│   ├── interceptors/        ← Idempotency interceptor
-│   ├── exceptions/          ← Global exception filter
-│   └── redis/               ← Redis service (lock + idempotency)
-│
-├── queue/
-│   ├── processors/          ← BullMQ job processors
-│   └── queue.constants.ts   ← Queue and job names
-│
-└── health/                  ← DB + Redis health checks
+├── common/                  ← Shared guards, decorators, interceptors, Redis lock
+├── queue/                   ← BullMQ job processors
+└── health/                  ← DB & Redis health checks
 ```
 
 ---
 
 ## 🔌 API Endpoints
 
-```
-AUTH
-  POST  /auth/register     → Create account
-  POST  /auth/login        → Get JWT token
+**🔐 Authentication**
 
-EVENTS
-  POST  /events            → Create event (admin)
-  GET   /events            → List live + scheduled events
-  GET   /events/:id        → Single event details
-  GET   /events/:id/tickets → Available tickets
-  PATCH /events/:id/status → Change event state (admin)
+- `POST /auth/register` — Create account
+- `POST /auth/login` — Get JWT token
 
-ORDERS
-  POST  /orders/book       → Book a ticket (requires x-idempotency-key)
-  GET   /orders/my-orders  → My booking history
+**🎟️ Events**
 
-HEALTH
-  GET   /health            → Database + Redis status
-```
+- `POST /events` — Create event _(Admin)_
+- `GET /events` — List live & scheduled events
+- `GET /events/:id` — Single event details
+- `GET /events/:id/tickets` — Available tickets
+- `PATCH /events/:id/status` — Change event state _(Admin)_
+
+**💳 Orders**
+
+- `POST /orders/book` — Book a ticket _(Requires `x-idempotency-key`)_
+- `GET /orders/my-orders` — My booking history
 
 ---
 
-## 🔐 Security
+## 🔐 Security Highlights
 
-```
-✅ JWT authentication on all private routes
-✅ bcrypt password hashing (10 rounds)
-✅ Rate limiting (Redis backed)
-   → Login: 5 attempts/minute
-   → Register: 10 attempts/minute
-   → Booking: 10 attempts/minute
-✅ Security headers via Helmet
-✅ Input validation on every endpoint
-✅ Admin routes protected by role guard
-✅ Idempotency key UUID validation
-✅ Lock token ownership (prevents wrong release)
-```
+- ✅ **JWT Auth** on all private routes
+- ✅ **bcrypt** password hashing (10 rounds)
+- ✅ **Rate Limiting** (Redis-backed: Login 5/min, Book 10/min)
+- ✅ **Helmet** for secure HTTP headers
+- ✅ Strict **Input Validation** on every endpoint
+- ✅ Admin routes protected by **Role Guards**
+- ✅ **UUID Validation** for idempotency keys
+- ✅ Lock token ownership validation
 
 ---
 
-## 🏃 Getting Started
+## 🗺️ What's Next?
 
-### Prerequisites
-
-```
-Node.js 18+
-Docker Desktop
-```
-
-### Setup
-
-```bash
-# 1. Clone repository
-git clone https://github.com/pradhanji09/ScaleTick
-cd scaletick/backend
-
-# 2. Install dependencies
-npm install
-
-# 3. Copy environment file
-cp .env.example .env
-
-# 4. Start PostgreSQL and Redis
-docker compose up -d
-
-# 5. Start development server
-npm run start:dev
-
-# 6. Open API explorer
-open http://localhost:3000/api/docs
-```
-
-### Environment Variables
-
-```env
-# Database
-POSTGRES_HOST=localhost
-POSTGRES_PORT=5432
-POSTGRES_USER=scaletick
-POSTGRES_PASSWORD=scaletick123
-POSTGRES_DB=scaletick_db
-
-# Redis
-REDIS_HOST=localhost
-REDIS_PORT=6379
-
-# Auth
-JWT_SECRET=your_secret_here
-JWT_EXPIRES_IN=7d
-
-# App
-PORT=3000
-NODE_ENV=development
-```
-
----
-
-## 🧪 Running Load Tests
-
-```bash
-# Concurrent booking test (proves zero overselling)
-docker run --rm -i grafana/k6 run - <load-tests/booking.test.js
-
-# Idempotency test (proves double-click safety)
-docker run --rm -i grafana/k6 run - <load-tests/idempotency.test.js
-```
-
-See [load-tests/LOAD_TEST_RESULTS.md](./load-tests/LOAD_TEST_RESULTS.md) for detailed results.
-
----
-
-## 🗺️ What I Would Add Next
-
-```
-[ ] Razorpay payment gateway integration
-    → PENDING → payment → CONFIRMED flow
-    → Webhook signature verification
-    → Failed payment releases ticket automatically
-
-[ ] TypeORM migrations
-    → Switch synchronize: false
-    → Versioned schema changes
-
-[ ] Prometheus + Grafana monitoring
-    → Real time request rate dashboard
-    → Redis lock acquisition metrics
-    → BullMQ queue depth monitoring
-
-[ ] Multiple ticket booking
-    → One order → multiple tickets
-    → Atomic multi-lock acquisition
-```
+- [ ] **Payment Gateway Integration:** Razorpay implementation (PENDING → payment → CONFIRMED flow).
+- [ ] **TypeORM Migrations:** Transition to versioned schema changes instead of synchronization.
+- [ ] **Observability:** Prometheus + Grafana dashboards for real-time monitoring.
+- [ ] **Multi-Ticket Booking:** Atomic multi-lock acquisition for booking several tickets at once.
 
 ---
 
 ## 👤 Author
 
-**Sourav Pradhan**
-Software Engineer | Node.js | NestJS | Distributed Systems
+**Sourav Pradhan**  
+_Software Engineer | Node.js | NestJS | Distributed Systems_
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue)](https://www.linkedin.com/in/sourav-pradhann)
 [![GitHub](https://img.shields.io/badge/GitHub-Follow-black)](https://github.com/pradhanji09)
