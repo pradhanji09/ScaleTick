@@ -17,11 +17,12 @@ import { OrderStatus } from '../../common/enums/order-status.enum';
 @Entity('orders')
 @Index(['userId', 'status', 'created_at'])
 @Index(['userId'])
+@Index(['userId', 'idempotency_key'], { unique: true })
 export class Order {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ unique: true })
+  @Column()
   idempotency_key: string;
 
   @Column({

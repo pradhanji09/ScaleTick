@@ -6,9 +6,10 @@ import {
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
-import { Observable, tap } from 'rxjs';
+import { catchError, Observable, tap } from 'rxjs';
 import { FastifyRequest, FastifyReply } from 'fastify';
 import {
+  ErrUnauthorized,
   InvalidIdempotencyKey,
   RequestProcessing,
 } from '../errors/common.errors';
@@ -38,6 +39,8 @@ export class IdempotencyInterceptor implements NestInterceptor {
     if (!isUUID(idempotencyKey)) throw InvalidIdempotencyKey;
 
     const userId = req.user?.id;
+    if (!userId) throw ErrUnauthorized;
+
     const redisKey = `idempotency:${userId}:${idempotencyKey}`;
 
     const existing: string | null =
@@ -62,6 +65,10 @@ export class IdempotencyInterceptor implements NestInterceptor {
     return next.handle().pipe(
       tap((response) => {
         void this.redisService.setCompleted(redisKey, response);
+      }),
+      catchError((error) => {
+        void this.redisService.deleteKey(redisKey);
+        throw error;
       }),
     );
   }

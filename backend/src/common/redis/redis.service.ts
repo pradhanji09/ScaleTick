@@ -47,6 +47,10 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     return this.client.get(key);
   }
 
+  async deleteKey(key: string): Promise<void> {
+    await this.client.unlink(key);
+  }
+
   // Distributed Lock
   async acquireLock(key: string, ttlSeconds: number): Promise<string | null> {
     const token = randomUUID();
